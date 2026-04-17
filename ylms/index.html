@@ -356,6 +356,9 @@ function renderQuestion(){
   document.getElementById('btn-prev').disabled=(currentQ===0);
   document.getElementById('btn-next').disabled=(answers[currentQ]===undefined);
   document.getElementById('btn-next').textContent=(currentQ===questions.length-1)?'查看结果 →':'下一题 →';
+  var container=document.getElementById('question-container');
+  container.style.pointerEvents='none';
+  setTimeout(function(){container.style.pointerEvents='';},350);
 }
 
 function selectOption(idx){
