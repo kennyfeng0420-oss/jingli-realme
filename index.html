@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>镜里 RealMe — 你在关系里，等的是什么</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+:root {
+  --bg: #f5f0eb;
+  --bg-card: #faf7f4;
+  --text-primary: #1a1210;
+  --text-secondary: #4a3f38;
+  --text-muted: #8a7a72;
+  --border: #ddd0c8;
+  --accent: #7a5f4e;
+  --accent-light: #b89a8a;
+  --selected-bg: #ede4dc;
+  --selected-border: #7a5f4e;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: "PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  font-weight: 300;
+  min-height: 100vh;
+  line-height: 1.7;
+}
+.container { max-width:660px; margin:0 auto; padding:0 24px; }
+.screen { display:none; }
+.screen.active { display:block; }
+
+/* INTRO */
+#screen-intro { min-height:100vh; display:none; flex-direction:column; justify-content:center; padding:60px 0; }
+#screen-intro.active { display:flex; }
+.brand { font-family:"STSong","SimSun","Georgia",serif; font-size:13px; letter-spacing:0.3em; color:var(--text-muted); margin-bottom:48px; }
+.intro-title { font-family:"STSong","SimSun","Georgia",serif; font-size:clamp(26px,5vw,36px); font-weight:300; line-height:1.4; margin-bottom:24px; color:var(--text-primary); }
+.intro-desc { font-size:14px; color:var(--text-secondary); line-height:1.9; margin-bottom:24px; }
+.intro-note { font-size:13px; color:var(--text-muted); margin-bottom:40px; padding:16px 20px; border-left:2px solid var(--border); line-height:1.8; }
+.btn-primary { display:inline-block; background:var(--text-primary); color:var(--bg); font-size:14px; letter-spacing:0.15em; padding:14px 36px; border:none; cursor:pointer; }
+.btn-primary:hover { opacity:0.8; }
+.divider { width:40px; height:1px; background:var(--border); margin:40px 0; }
+.footer-text { font-size:13px; color:var(--text-muted); line-height:1.9; }
+
+/* QUIZ */
+#screen-quiz { padding:40px 0 80px; }
+.quiz-header { margin-bottom:36px; }
+.quiz-brand { font-family:"STSong","SimSun","Georgia",serif; font-size:12px; letter-spacing:0.3em; color:var(--text-muted); margin-bottom:20px; }
+.progress-bar { height:1px; background:var(--border); margin-bottom:6px; }
+.progress-fill { height:100%; background:var(--accent); transition:width 0.4s ease; }
+.progress-text { font-size:12px; color:var(--text-muted); }
+.question-card { background:var(--bg-card); padding:36px; margin-bottom:20px; }
+.question-number { font-size:11px; letter-spacing:0.2em; color:var(--text-muted); margin-bottom:16px; }
+.question-scene { font-size:13px; color:var(--text-secondary); line-height:1.9; margin-bottom:20px; padding-bottom:20px; border-bottom:1px solid var(--border); font-style:italic; }
+.question-text { font-family:"STSong","SimSun","Georgia",serif; font-size:16px; color:var(--text-primary); line-height:1.6; margin-bottom:24px; }
+.options { display:flex; flex-direction:column; gap:10px; }
+.option { padding:14px 18px; border:1px solid var(--border); background:transparent; cursor:pointer; text-align:left; font-size:13px; color:var(--text-secondary); line-height:1.6; transition:all 0.15s; display:flex; gap:12px; align-items:flex-start; }
+.option:hover { border-color:var(--accent-light); color:var(--text-primary); background:var(--selected-bg); }
+.option.selected { border-color:var(--selected-border); background:var(--selected-bg); color:var(--text-primary); }
+.option-letter { font-family:"STSong","SimSun","Georgia",serif; font-size:11px; color:var(--accent); flex-shrink:0; margin-top:2px; }
+.quiz-nav { display:flex; justify-content:space-between; align-items:center; margin-top:24px; }
+.btn-prev { font-size:13px; color:var(--text-muted); background:none; border:none; cursor:pointer; padding:8px 0; }
+.btn-prev:hover { color:var(--text-secondary); }
+.btn-prev:disabled { opacity:0.3; cursor:default; }
+.btn-next { font-size:13px; color:var(--bg); background:var(--text-primary); border:none; cursor:pointer; letter-spacing:0.1em; padding:12px 28px; }
+.btn-next:hover { opacity:0.8; }
+.btn-next:disabled { opacity:0.3; cursor:default; }
+
+/* REVEAL */
+#screen-reveal { min-height:100vh; display:none; flex-direction:column; justify-content:center; padding:60px 0; text-align:center; }
+#screen-reveal.active { display:flex; }
+.reveal-label { font-size:12px; letter-spacing:0.2em; color:var(--text-muted); margin-bottom:16px; }
+.reveal-name { font-family:"STSong","SimSun","Georgia",serif; font-size:clamp(28px,6vw,44px); color:var(--text-primary); margin-bottom:16px; line-height:1.3; }
+.reveal-tagline { font-size:14px; color:var(--text-secondary); line-height:1.9; margin-bottom:36px; font-style:italic; white-space:pre-line; }
+.reveal-dims-explain { margin-bottom:36px; text-align:left; max-width:480px; margin-left:auto; margin-right:auto; }
+.dim-explain-item { margin-bottom:16px; padding:16px 18px; background:var(--bg-card); border-left:2px solid var(--accent-light); }
+.dim-explain-label { font-size:11px; letter-spacing:0.15em; color:var(--accent); margin-bottom:6px; }
+.dim-explain-name { font-family:"STSong","SimSun","Georgia",serif; font-size:14px; color:var(--text-primary); margin-bottom:4px; }
+.dim-explain-desc { font-size:12px; color:var(--text-secondary); line-height:1.8; }
+.reveal-vline { width:1px; height:36px; background:var(--border); margin:0 auto 32px; }
+.reveal-teaser { font-size:13px; color:var(--text-muted); line-height:1.9; margin-bottom:32px; }
+.btn-outline { display:inline-block; border:1px solid var(--text-primary); color:var(--text-primary); background:transparent; font-size:13px; letter-spacing:0.15em; padding:14px 36px; cursor:pointer; transition:all 0.2s; }
+.btn-outline:hover { background:var(--text-primary); color:var(--bg); }
+
+/* RESULT */
+#screen-result { padding:52px 0 80px; }
+.result-header { margin-bottom:40px; padding-bottom:32px; border-bottom:1px solid var(--border); }
+.result-brand { font-family:"STSong","SimSun","Georgia",serif; font-size:12px; letter-spacing:0.3em; color:var(--text-muted); margin-bottom:28px; }
+.result-type-label { font-size:11px; letter-spacing:0.25em; color:var(--text-muted); margin-bottom:8px; }
+.result-name { font-family:"STSong","SimSun","Georgia",serif; font-size:clamp(22px,5vw,34px); color:var(--text-primary); margin-bottom:10px; line-height:1.3; }
+.result-tagline { font-size:13px; color:var(--text-secondary); font-style:italic; line-height:1.8; margin-bottom:20px; white-space:pre-line; }
+.result-dims-explain { margin-bottom:24px; }
+.share-btns { display:flex; gap:10px; flex-wrap:wrap; }
+.btn-share { background:transparent; border:1px solid var(--border); color:var(--text-secondary); font-size:12px; letter-spacing:0.08em; padding:10px 18px; cursor:pointer; transition:all 0.2s; }
+.btn-share:hover { border-color:var(--accent); color:var(--accent); }
+.result-section { margin-bottom:36px; padding-bottom:36px; border-bottom:1px solid var(--border); }
+.result-section:last-child { border-bottom:none; }
+.section-label { font-size:11px; letter-spacing:0.2em; color:var(--text-muted); margin-bottom:12px; font-family:"STSong","SimSun","Georgia",serif; }
+.section-title { font-family:"STSong","SimSun","Georgia",serif; font-size:17px; color:var(--text-primary); margin-bottom:12px; line-height:1.5; }
+.section-body { font-size:14px; color:var(--text-secondary); line-height:1.9; }
+.section-body p { margin-bottom:12px; }
+.section-body p:last-child { margin-bottom:0; }
+.highlight-box { background:var(--selected-bg); padding:14px 18px; border-left:2px solid var(--accent-light); margin:14px 0; font-size:13px; color:var(--text-secondary); line-height:1.9; font-style:italic; }
+.reflect-q { font-family:"STSong","SimSun","Georgia",serif; font-size:15px; color:var(--text-primary); line-height:1.8; margin-top:18px; padding-top:18px; border-top:1px solid var(--border); }
+.result-footer { margin-top:48px; text-align:center; }
+.result-footer p { font-size:13px; color:var(--text-muted); line-height:1.9; }
+
+/* SHARE CARDS (hidden) */
+.share-card-wrap {
+  position:fixed; top:-9999px; left:0;
+  width:750px;
+  background:var(--bg);
+  padding:72px 64px;
+  font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+}
+.sc-brand { font-family:"STSong","SimSun","Georgia",serif; font-size:13px; letter-spacing:0.3em; color:var(--text-muted); margin-bottom:52px; }
+.sc-label { font-size:11px; letter-spacing:0.25em; color:var(--text-muted); margin-bottom:10px; }
+.sc-name { font-family:"STSong","SimSun","Georgia",serif; font-size:52px; color:var(--text-primary); margin-bottom:14px; line-height:1.2; }
+.sc-tagline { font-size:15px; color:var(--text-secondary); line-height:1.9; font-style:italic; white-space:pre-line; margin-bottom:32px; }
+.sc-divider { width:36px; height:1px; background:var(--border); margin-bottom:28px; }
+.sc-dims { margin-bottom:32px; }
+.sc-dim-item { margin-bottom:12px; }
+.sc-dim-label { font-size:10px; letter-spacing:0.15em; color:var(--accent); margin-bottom:3px; }
+.sc-dim-name { font-family:"STSong","SimSun","Georgia",serif; font-size:14px; color:var(--text-primary); margin-bottom:2px; }
+.sc-dim-desc { font-size:12px; color:var(--text-secondary); line-height:1.7; }
+.sc-extra { margin-bottom:32px; }
+.sc-extra-item { padding:14px 18px; border-left:2px solid var(--accent-light); margin-bottom:12px; }
+.sc-extra-label { font-size:10px; letter-spacing:0.15em; color:var(--text-muted); margin-bottom:4px; }
+.sc-extra-text { font-size:13px; color:var(--text-secondary); line-height:1.7; }
+.sc-footer { font-family:"STSong","SimSun","Georgia",serif; font-size:12px; letter-spacing:0.2em; color:var(--text-muted); padding-top:24px; border-top:1px solid var(--border); }
+
+/* Modal */
+#share-modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.55); z-index:999; justify-content:center; align-items:center; }
+#share-modal.active { display:flex; }
+.share-modal-inner { background:var(--bg-card); padding:28px 24px; max-width:480px; width:92%; text-align:center; max-height:90vh; overflow-y:auto; }
+.share-modal-title { font-family:"STSong","SimSun","Georgia",serif; font-size:16px; color:var(--text-primary); margin-bottom:6px; }
+.share-modal-desc { font-size:12px; color:var(--text-muted); margin-bottom:16px; line-height:1.7; }
+#share-preview { max-width:100%; border:1px solid var(--border); display:block; margin:0 auto 16px; }
+.share-modal-btns { display:flex; gap:10px; justify-content:center; }
+.btn-download { background:var(--text-primary); color:var(--bg); border:none; font-size:13px; letter-spacing:0.1em; padding:11px 22px; cursor:pointer; }
+.btn-close-modal { background:transparent; border:1px solid var(--border); color:var(--text-muted); font-size:13px; padding:11px 22px; cursor:pointer; }
+
+@media(max-width:480px) {
+  .question-card { padding:20px 16px; }
+  .container { padding:0 16px; }
+  .dim-explain-item { padding:12px 14px; }
+}
+</style>
+</head>
+<body>
+
+<!-- INTRO -->
+<div id="screen-intro" class="screen active">
+  <div class="container">
+    <div class="brand">镜里 REALME</div>
+    <h1 class="intro-title">你在关系里，<br>等的是什么</h1>
+    <p class="intro-desc">这个测评没有标准答案。<br>每一道题，请选择你最真实的第一反应——<br>不是你觉得应该怎样，是你当时实际怎样。</p>
+    <div class="intro-note">不需要想太久。第一反应往往最诚实。<br>共 15 题，大约需要 5 分钟。</div>
+    <button class="btn-primary" id="btn-start">开始照见</button>
+    <div class="divider"></div>
+    <p class="footer-text">镜里不提供答案，只照见你。<br>所有的关系，都是自我的反射。</p>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div id="screen-quiz" class="screen">
+  <div class="container">
+    <div class="quiz-header">
+      <div class="quiz-brand">镜里 REALME</div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+      <div class="progress-text" id="progress-text">0 / 15</div>
+    </div>
+    <div id="question-container"></div>
+    <div class="quiz-nav">
+      <button class="btn-prev" id="btn-prev" disabled>← 上一题</button>
+      <button class="btn-next" id="btn-next" disabled>下一题 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- REVEAL -->
+<div id="screen-reveal" class="screen">
+  <div class="container">
+    <div class="brand" style="margin-bottom:44px;">镜里 REALME</div>
+    <div class="reveal-label">你的镜像</div>
+    <div class="reveal-name" id="reveal-name"></div>
+    <div class="reveal-tagline" id="reveal-tagline"></div>
+    <div class="reveal-dims-explain" id="reveal-dims-explain"></div>
+    <div class="reveal-vline"></div>
+    <div class="reveal-teaser">镜里为你准备了一份报告。<br>它会告诉你这个模式从哪里来，<br>它的力量和盲点是什么，<br>以及走向极端时你需要警惕的地方。</div>
+    <button class="btn-outline" id="btn-full-result">查看完整报告</button>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div id="screen-result" class="screen">
+  <div class="container">
+    <div class="result-header">
+      <div class="result-brand">镜里 REALME — 你的镜像报告</div>
+      <div class="result-type-label">你是</div>
+      <div class="result-name" id="result-name"></div>
+      <div class="result-tagline" id="result-tagline"></div>
+      <div class="result-dims-explain" id="result-dims-explain"></div>
+      <div class="share-btns" style="margin-top:20px;">
+        <button class="btn-share" id="btn-share-lite">生成精炼分享图</button>
+        <button class="btn-share" id="btn-share-full">生成完整分享图</button>
+      </div>
+    </div>
+    <div id="result-content"></div>
+    <div class="result-footer">
+      <div class="brand" style="margin-bottom:10px;">镜里 REALME</div>
+      <p>镜里不提供答案，只照见你。<br>欢迎私信我们，聊聊你在镜子里看见了什么。</p>
+    </div>
+  </div>
+</div>
+
+<!-- SHARE CARD LITE -->
+<div id="share-card-lite" class="share-card-wrap">
+  <div class="sc-brand">镜里 REALME</div>
+  <div class="sc-label">你是</div>
+  <div class="sc-name" id="sc-lite-name"></div>
+  <div class="sc-tagline" id="sc-lite-tagline"></div>
+  <div class="sc-divider"></div>
+  <div class="sc-dims" id="sc-lite-dims"></div>
+  <div class="sc-footer">镜里 RealMe · 你在关系里，等的是什么</div>
+</div>
+
+<!-- SHARE CARD FULL -->
+<div id="share-card-full" class="share-card-wrap">
+  <div class="sc-brand">镜里 REALME</div>
+  <div class="sc-label">你是</div>
+  <div class="sc-name" id="sc-full-name"></div>
+  <div class="sc-tagline" id="sc-full-tagline"></div>
+  <div class="sc-divider"></div>
+  <div class="sc-dims" id="sc-full-dims"></div>
+  <div class="sc-extra" id="sc-full-extra"></div>
+  <div class="sc-footer">镜里 RealMe · 你在关系里，等的是什么</div>
+</div>
+
+<!-- MODAL -->
+<div id="share-modal">
+  <div class="share-modal-inner">
+    <div class="share-modal-title">你的镜像报告</div>
+    <div class="share-modal-desc">长按图片保存，或点击下载</div>
+    <img id="share-preview" src="" alt="分享图">
+    <div class="share-modal-btns">
+      <button class="btn-download" id="btn-download">下载图片</button>
+      <button class="btn-close-modal" id="btn-close-modal">关闭</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+
+var questions=[
+  {id:1,scene:"结束了忙碌的一周，周五你们好不容易抽出时间一起吃了顿饭。饭后各自回家，到家之后你发了一条消息：\u201C到家了吗\uff1f\u201D等了几分钟，他回了一个字：\u201C嗯\u3002\u201D就这一个字，没有别的。",text:"你看着这个\u201C嗯\u201D，停了一下。然后你怎么做的？",options:[{letter:"A",text:"放下手机去做别的事，但隔几分钟忍不住又拿起来看了一眼",d1:1,d2:2},{letter:"B",text:"没放下，盯着对话框，开始纠结要不要再发一条",d1:2,d2:2},{letter:"C",text:"直接回过去：\u201C你在干嘛呀\uff1f\u201D或者\u201C就这么敷衍\uff1f\u201D",d1:-1,d2:1},{letter:"D",text:"放下手机，心里有点不舒服，但告诉自己他可能只是累了",d1:-1,d2:-1}]},
+  {id:2,scene:"后来你们打了个电话。聊了几句，他听出你声音有点不对，停下来问你：\u201C怎么了\uff1f是不是不开心\uff1f\u201D你沉默了一下，说：\u201C没事，就是有点累。\u201D挂掉电话之后，你躺在床上，盯着天花板。",text:"你说\u201C没事\u201D的那一刻，你内心真实的状态是哪个？",options:[{letter:"A",text:"真的没什么，就是有点累，不需要多说",d1:-1,d2:-2},{letter:"B",text:"有点不舒服，但我自己也说不清楚是为什么，开口反而麻烦",d1:1,d2:1},{letter:"C",text:"他问了，我就已经好一点了。他发现了，这对我来说就够了",d1:1,d2:-1},{letter:"D",text:"有事，但我不确定他是否真的想听，说了怕扫兴",d1:2,d2:2}]},
+  {id:3,scene:"过了一两天，有天晚上他突然发消息过来：\u201C感觉你最近很累啊，还好吗\uff1f\u201D就这一句话，他主动问了。",text:"你看到这条消息，第一反应是什么？",options:[{letter:"A",text:"心里一下子软了，眼眶有点热，终于有人看见了",d1:2,d2:2},{letter:"B",text:"回了\u201C还好\u201D，但心里好了很多，觉得他还是在意的",d1:1,d2:-1},{letter:"C",text:"开始跟他说了，把这几天憋着的东西慢慢说出来",d1:-1,d2:1},{letter:"D",text:"有点惊讶，然后问他：\u201C你怎么突然这么问\uff1f\u201D",d1:-2,d2:-2}]},
+  {id:4,scene:"那天晚上，你在书桌前盯着屏幕，群里的消息还在跳，报表上的数字你看了好几遍，没进脑子。他在沙发上刷手机，屏幕的光打在他脸上。某个时刻，他抬起头，看了你一眼，没有说话，然后低下头继续看手机。",text:"就这一个眼神。你怎么解读这个眼神？",options:[{letter:"A",text:"他可能只是随便看了一眼，没什么特别的意思",d1:-2,d2:-2},{letter:"B",text:"他看了，但他读不出我的状态——他可能以为我只是在专注工作",d1:2,d2:1},{letter:"C",text:"他看见我了，但他以为我还好，所以没有多问",d1:1,d2:-1},{letter:"D",text:"他看见了，但不知道该说什么，或者不知道我需要他",d1:1,d2:1}]},
+  {id:5,scene:"还是那天晚上。你坐在书桌前，水杯空了很久了，群里的消息还在跳。你其实很累，你知道自己需要他过来陪你一下。",text:"你没有说。让你没有开口的，最接近哪个原因？",options:[{letter:"A",text:"说出来感觉少了什么——如果他真的在乎，他应该自己发现",d1:2,d2:2},{letter:"B",text:"怕开口之后他过来了，但心思还在手机上，还不如不说",d1:1,d2:2},{letter:"C",text:"不知道怎么开口，说\u201C我需要你\u201D这几个字感觉很难出口",d1:2,d2:1},{letter:"D",text:"其实我可以开口，只是觉得这点小事自己消化就好了",d1:-2,d2:-2}]},
+  {id:6,scene:"你们平时聊天，他偶尔会没来由地发你一条消息，说他在想你，或者分享一件刚刚看到的小事。但最近一段时间，这种消息几乎没有了。每次都是你先发，他回，但他不再主动开口。",text:"你注意到了这个变化。你内心的第一反应更接近哪个？",options:[{letter:"A",text:"他最近可能比较忙或者比较累，这很正常，我等他缓过来",d1:-1,d2:-2},{letter:"B",text:"我开始回想，是不是最近发生了什么，让他对我有点冷淡",d1:1,d2:2},{letter:"C",text:"他主动联系少了，说明我们之间的热度在下降",d1:2,d2:2},{letter:"D",text:"我会直接问他：\u201C你最近怎么了，感觉你有点不一样\uff1f\u201D",d1:-1,d2:1}]},
+  {id:7,scene:"上周你们见面吃饭。饭吃到一半，他拿出手机看了好几次。你问他：\u201C没事吧\uff1f\u201D他说：\u201C没事，工作上有点事。\u201D然后放下手机，但整个晚上他都有点心不在焉，跟你说话也是有一搭没一搭的。",text:"回家之后，你一个人躺在床上，回想这个晚上。你内心的感受更接近哪个？",options:[{letter:"A",text:"他工作上有压力，这种时候我应该给他多一点空间",d1:-2,d2:-2},{letter:"B",text:"我有点失落，但我理解他——工作的事情我也没办法帮上什么",d1:-1,d2:-1},{letter:"C",text:"我开始想，他是不是对我们在一起这件事有点倦怠了",d1:2,d2:2},{letter:"D",text:"我很不舒服，那个晚上明明是我们难得见面的时间",d1:1,d2:2}]},
+  {id:8,scene:"你们在一起有一段时间了，关系很稳定。没有吵架，没有什么特别的事情发生。他对你也好，只是少了刚开始在一起时的那种热烈——不再突然送花，不再发很长的消息，见面也是平平淡淡地过。",text:"你怎么看待现在这个状态？",options:[{letter:"A",text:"这就是爱情本来的样子，稳定就是最好的状态",d1:-2,d2:-2},{letter:"B",text:"我享受这种稳定，但偶尔还是会怀念刚开始的感觉",d1:-1,d2:-1},{letter:"C",text:"我开始担心，他是不是没有以前那么喜欢我了",d1:2,d2:2},{letter:"D",text:"我需要做点什么，让我们之间重新有一点热度",d1:1,d2:2}]},
+  {id:9,scene:null,isBg:true,text:"小时候你不开心或者受了委屈，家里通常会发生什么？",options:[{letter:"A",text:"会有人注意到，主动过来问你，或者陪着你",bg:"A",d1:0,d2:0},{letter:"B",text:"家里会告诉你：要坚强，这点小事没什么大不了的，自己想开就好了",bg:"B",d1:0,d2:0},{letter:"C",text:"大家都有自己的事，你通常自己把情绪消化掉，没有人会特别过问",bg:"C",d1:0,d2:0},{letter:"D",text:"你一表现出不开心，家里气氛就变了，事情越闹越糟。慢慢地你学会了：不表现出来，反而更平静",bg:"D",d1:0,d2:0}]},
+  {id:10,scene:null,isBg:true,text:"在你过去的经历里，有没有一段关系——恋爱或者很重要的友情——你以为它会一直在，但它忽然就不在了？",options:[{letter:"A",text:"没有过，我的重要关系基本都是平稳过渡的",bg:"A",d1:0,d2:0},{letter:"B",text:"有过，但我后来慢慢接受了，没有留下太深的影响",bg:"B",d1:0,d2:0},{letter:"C",text:"有过，那之后我开始觉得关系是不确定的，随时可能会变",bg:"C",d1:0,d2:0},{letter:"D",text:"有过，那是我对关系看法改变的一个转折点，我开始不太相信稳定这件事",bg:"D",d1:0,d2:0}]},
+  {id:11,scene:null,isBg:true,text:"在你成长的过程里，家人或者身边重要的人，通常是用什么方式让你感受到被爱的？",options:[{letter:"A",text:"他们会直接说出来——表扬你，告诉你他们爱你，为你骄傲",bg:"A",d1:0,d2:0},{letter:"B",text:"他们不太说，但会用行动表达——给你做饭、接送你、默默把你需要的东西准备好",bg:"B",d1:0,d2:0},{letter:"C",text:"他们通过陪伴表达——只要你需要，他们就在，不需要做什么特别的事",bg:"C",d1:0,d2:0},{letter:"D",text:"我不太确定他们有没有表达过，或者我感受不太到",bg:"D",d1:0,d2:0}]},
+  {id:12,scene:null,text:"在一段关系里，什么样的时刻会让你觉得最安心？",options:[{letter:"A",text:"我们不需要说什么，但我知道他在，这就够了",d1:-1,d2:-2},{letter:"B",text:"他在我需要的时候出现，不需要我开口，他就感觉到了",d1:2,d2:2},{letter:"C",text:"我们能把话说开，不管发生什么都可以好好谈",d1:-2,d2:-1},{letter:"D",text:"我们吵完架能好好和解，关系还在，比什么都重要",d1:-1,d2:-1}]},
+  {id:13,scene:null,text:"你们在一起有一段时间了。有一天你忽然意识到，你不确定他现在是不是还像以前一样喜欢你。不是因为发生了什么大事，只是一种说不清楚的感觉。你会怎么做？",options:[{letter:"A",text:"我会直接问他：你最近对我们的感觉怎么样？",d1:-2,d2:1},{letter:"B",text:"我会观察接下来他的行为，看看能不能从里面找到答案",d1:1,d2:2},{letter:"C",text:"我会告诉自己：这种感觉只是我多想了，他应该还好",d1:-1,d2:-2},{letter:"D",text:"我会开始回想最近发生的事，试图找出是哪里出了问题",d1:2,d2:2}]},
+  {id:14,scene:null,text:"有一种说法是：真正爱你的人，不需要你说，他就能感觉到你需要他。你对这句话的感受，更接近哪个？",options:[{letter:"A",text:"我很认同，我觉得感知是爱很重要的一部分",d1:2,d2:2},{letter:"B",text:"我觉得这是一种理想状态，但现实里很难做到，不能这么要求对方",d1:1,d2:-1},{letter:"C",text:"我不太认同，爱需要沟通和表达，不能靠对方猜",d1:-2,d2:-1},{letter:"D",text:"我以前很认同这句话，但被现实磨了之后，我不确定了",d1:1,d2:2}]},
+  {id:15,scene:null,text:"在一段亲密关系里，你最害怕发生的事情是哪个？",options:[{letter:"A",text:"他开始对我冷淡，但我不知道原因是什么",fear:"A",d1:2,d2:2},{letter:"B",text:"我说出了我的需求，但他觉得我在无理取闹",fear:"B",d1:1,d2:2},{letter:"C",text:"我们之间慢慢没有话说，变得像陌生人",fear:"C",d1:-1,d2:1},{letter:"D",text:"他一直都在，但我感受不到他爱我",fear:"D",d1:2,d2:2}]}
+];
+
+var quadrants={
+  "1":{name:"等灯的人",tagline:"你只认他那道光。\n它亮着，你就在。\n它暗下去，你开始怀疑自己是否还被看见。",
+    d1Name:"感知方式 · 单一",d1Desc:"你对爱有一个非常具体的认可形式。只有当爱以那种特定的方式出现，你才真正接收到了。其他形式的爱在你这里是打折的，不算数的。",
+    d2Name:"爱的假设 · 持续感知",d2Desc:"你需要持续感知到爱的存在才能安心。不是因为不信任，而是一旦那道光暗下去，你就开始不确定它是否还在。",
+    p1:"你对爱有一个非常具体的认可形式。不是所有的表达都能照到你，只有某一种特定的方式——可能是他主动察觉你的状态，可能是他说出某句话，可能是他用某个具体的行动让你感受到他在看你——当它以这种形式出现，你真正被照见了。其他方式你也知道，但那道光在你这里是模糊的，打折的，不算数的。",
+    p2:"同时，你需要持续感知到这道光照在你身上。不是因为你不信任他，而是一旦它暗下去，哪怕只是一会儿，你就开始不确定——它是不是还在？我是不是还在他眼里？",
+    p3:"在关系里，你是感知最细腻的那个人。他语气变了，他回消息慢了，他今天笑得少了——这些你都能接收到，而且你会认真对待。",
+    strength:"你的感知极其细腻，你真正在场。你不会让一段关系在惰性里慢慢消失，因为你一直在看着它。你的在乎是有重量的，是具体的，是让对方真实感受到被重视的。",
+    blind:"你的感知通道很窄，对方用其他方式爱你，你接收到的是打折版本。他以为自己在付出，你以为自己没有被爱，你们都是真实的，但频道对不上。",
+    extreme:"你对那道光的需求，可能会变成一种无意识的考验机制。你在等他察觉，但你不说——不是因为你不想说，而是你需要他自己发现，这样才算数。但这个算数的标准会越来越高，越来越难被满足。",
+    extremeHL:"最需要警惕的是这个循环本身：你越需要被证明，对方越难满足你的标准；对方越难满足，你越不确定爱是否还在。这个循环需要你看见它，然后问自己：我在等的那道光，真的只有他能开吗？"},
+  "2":{name:"持续在线的人",tagline:"你什么都能感受到，\n但你需要它一直在。",
+    d1Name:"感知方式 · 多元",d1Desc:"你能从不同的表达方式里感受到爱。他说了什么，做了什么，用什么眼神看你——这些你都能接收到，不会因为形式不对就感受不到。",
+    d2Name:"爱的假设 · 持续感知",d2Desc:"你需要持续感知到爱的存在才能安心。一旦信号变少，哪怕只是变少，你就会开始不确定——它是不是还在流向我？",
+    p1:"你的感知通道是宽的。他说了什么，做了什么，用什么眼神看你，在什么时刻想到你发了一条消息——这些你都能接收到，不会因为形式不对就感受不到。你不挑他爱你的方式，你有能力从不同的表达里读出爱的存在。",
+    p2:"但你需要持续感知到它。不是因为你不信任他，而是在你的感知里，爱是需要被持续输入的——一旦信号变少，哪怕只是变少，不是消失，你就会开始不确定。",
+    p3:"在关系里，你是投入最充沛的那个人。你愿意用各种方式爱对方，也期待对方用各种方式回应你。你不苛求形式，但你需要频率。",
+    strength:"你能感受到对方不同形式的付出，不会因为他不擅长某种表达方式就感受不到被爱。你对关系的投入是全方位的，你带给关系的能量是真实而持续的。",
+    blind:"当对方进入一个低输出的阶段，你会感到爱在减少，即使它并没有真的减少。你的感知通道越宽，你对信号减少的感知也越敏锐。这种敏锐是你的礼物，也是你的负担。",
+    extreme:"你对频率的需求，可能会变成一种无意识的消耗机制。你付出很多，你期待等量的回应；对方回应少了，你付出更多；你付出越多，你对回应的期待越高。这个循环不是刻意的，但它会让你越来越疲惫。",
+    extremeHL:"最需要警惕的是这件事：你的感知能力是你真实的礼物，但它需要一个边界。不是所有的信号都需要被解读，不是所有的减少都意味着爱在消失。"},
+  "3":{name:"守着一种光的人",tagline:"你只认一种光，\n但你相信它一旦亮过，就不会轻易熄灭。",
+    d1Name:"感知方式 · 单一",d1Desc:"你对爱有一个非常具体的认可形式。只有当爱以那种特定的方式出现，你才真正接收到了。其他形式的爱在你这里是打折的，不算数的。",
+    d2Name:"爱的假设 · 稳定恒态",d2Desc:"你相信爱是稳定存在的。它被你感知到了，就在那里，不会因为他今天少说了一句话就消失。你对关系有一种内生的笃定，不容易被细节动摇。",
+    p1:"你对爱有一个非常具体的认可形式。不是所有的表达都能真正照到你，只有某一种特定的方式——当爱以这种形式出现，你接收到了，你相信了。",
+    p2:"但和别人不同的是，你不需要它反复出现来维持你的安全感。你相信爱是稳定存在的——它被你感知到了，就在那里，不会因为他今天少说了一句话就消失。",
+    p3:"在关系里，你是那个稳定的人。你给对方足够的空间，不会因为他某天状态不好就开始怀疑。你的爱通常是具体的、落地的，体现在行动和细节里。",
+    strength:"你是关系里的压舱石。你给对方足够的空间，不需要对方时刻表现完美。你的安全感不依赖持续的外部输入，这让你在关系里有一种真实的从容。",
+    blind:"你只认一种语言。对方用其他方式爱你，你知道，但那个信号在你这里是打折的。长期下来，对方可能感到自己的付出没有被真正看见，开始减少输出。",
+    extreme:"你的稳定性是真实的礼物，但它有时候会变成一种沉默的忍耐。你相信爱在那里，所以你不说。他用错误的语言爱你，你感受不到，但你告诉自己他是爱我的，然后压下去。一次两次没关系，但这种压抑会积累。",
+    extremeHL:"最需要警惕的是这件事：你的稳定性让你成为关系里那个撑着的人，但撑着不等于不需要。如果你一直没有被那种方式照到，那扇你以为稳稳关着的门，可能在你自己都没有意识到的时候，已经慢慢关上了。"},
+  "4":{name:"宽广的容纳者",tagline:"你什么都能感受到，而且你相信它在那里。\n但你自己呢？",
+    d1Name:"感知方式 · 多元",d1Desc:"你能从不同的表达方式里感受到爱。他说了什么，做了什么，用什么眼神看你——这些你都能接收到，不会因为形式不对就感受不到。",
+    d2Name:"爱的假设 · 稳定恒态",d2Desc:"你相信爱是稳定存在的。他今天少说了一句话，他最近回消息慢了——你注意到了，但你不会把它们解读为爱在消失。",
+    p1:"你的感知通道是宽的，你的内心是稳定的。他说了什么，做了什么，用什么方式在你身边——这些你都能接收到。同时，你相信爱是稳定存在的。他今天少说了一句话，他最近回消息慢了——你注意到了，但你不会把它们解读为爱在消失。",
+    p2:"在关系里，你是弹性最大的那个人。你能开口说需求，也能等待被感知；你能接受对方不同形式的表达，也能在对方没有表达的时候不陷入怀疑。",
+    p3:"你给关系提供了稳定性，也给对方提供了真实的空间。你不容易在关系里迷失，因为你既能表达自己，又能接受对方。",
+    strength:"你能感受到对方不同形式的付出，不会因为他不擅长某种表达方式就感受不到被爱。你对关系有基本的信心，不容易被细节动摇。",
+    blind:"弹性高、安全感稳，有时候会让你对自己真实需求的感知变得迟钝。你能接受很多，但能接受和真的不需要是两件事。你可能习惯了调整自己去适应，久而久之忘记了自己原本想要的是什么。",
+    extreme:"你的弹性和稳定，有时候会变成一种无边界的容纳。你能接受，你能理解，你能调整——于是你一直在接受，一直在理解，一直在调整。但你自己的情绪、需求和状态起伏，你放在哪里？",
+    extremeHL:"最需要警惕的是这件事：你的稳定性让你成为关系里最容易被依赖的那个人，但依赖不等于被看见。你有没有给自己一个空间，去感受你真正需要的是什么——不是你能接受的，不是你愿意给的，而是你真正想要的？"}
+};
+
+var bgOrigin={"A":"在你成长的环境里，有人总是在你需要的时候出现。你内化的是：爱是稳定的，我的需求会被回应。但进入亲密关系之后，你仍然需要持续感知到爱的存在，才能真正安心。","B":"你被教导情绪是需要被管理的，不是需要被回应的。久而久之，你对被看见这件事有了一种特殊的渴望——因为它在你早期的经验里是稀缺的，当它出现时你格外珍视，当它消失时你格外不安。","C":"你习惯了自己消化，没有人特别过问。但进入亲密关系之后，你发现你其实渴望被看见——那种渴望一直都在，只是你以前没有地方放它。","D":"你发现表现出情绪会让事情变得更糟，所以你学会了不表现。但这不意味着你不需要被看见，而是你从来没有安全地被看见过。现在你把那个很早就有的渴望带进了亲密关系里。"};
+var q10AddOn={"C":"你经历过一次以为它会一直在、但它忽然不在了的时刻。那之后，你开始不相信感受不到等于它还在。你需要持续感知到它，因为你亲身验证过——感受不到，然后它真的不在了。","D":"那次经历彻底改写了你对关系的基本假设。你从相信稳定，变成了不太相信稳定。这让你需要更多、更持续的确认，才能相信爱还在这里。"};
+var needDesc={"A":"你最需要的是：他用语言告诉你。那句话在你这里有很重的分量，因为它是你最能接收到的那道光。","B":"你最需要的是：他用行动来到你身边。不需要说什么，但他放下手机，走过来——这个动作比任何语言都有分量。","C":"你最需要的是：他察觉到你，然后出现。不需要做什么，不需要说什么，但他感觉到了，然后他来了——这就是你最认的那道光。","D":"你最需要的是：一个清晰的、毫不含糊的信号，告诉你他在这里，他看见你了。因为你从来没有被充分喂养过，所以你需要那道光足够明亮，才能真正照到你。"};
+var reflectMap={"A":"你不知道原因是什么——这种不确定感，在你的关系里是第一次出现，还是一个熟悉的感觉？","B":"说出需求，然后被否定——这件事你经历过吗？那一次，你后来怎么做的？","C":"变成陌生人——你最害怕的是失去连接本身，还是害怕那意味着什么？","D":"他在，但你感受不到——你有没有想过，你需要的那个感受，究竟是什么样子的？"};
+
+var currentQ=0,answers={},score_d1=0,score_d2=0,quadrantKey="",autoTimer=null;
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function buildDimsHtml(qd,style){
+  // style: 'block' for page, 'card' for share card
+  if(style==='card'){
+    return '<div class="sc-dim-item"><div class="sc-dim-label">维度一</div><div class="sc-dim-name">'+qd.d1Name+'</div><div class="sc-dim-desc">'+qd.d1Desc+'</div></div>'+
+           '<div class="sc-dim-item"><div class="sc-dim-label">维度二</div><div class="sc-dim-name">'+qd.d2Name+'</div><div class="sc-dim-desc">'+qd.d2Desc+'</div></div>';
+  }
+  return '<div class="dim-explain-item"><div class="dim-explain-label">维度一</div><div class="dim-explain-name">'+qd.d1Name+'</div><div class="dim-explain-desc">'+qd.d1Desc+'</div></div>'+
+         '<div class="dim-explain-item"><div class="dim-explain-label">维度二</div><div class="dim-explain-name">'+qd.d2Name+'</div><div class="dim-explain-desc">'+qd.d2Desc+'</div></div>';
+}
+
+function renderQuestion(){
+  var q=questions[currentQ];
+  var pct=(currentQ/questions.length)*100;
+  document.getElementById('progress-fill').style.width=pct+'%';
+  document.getElementById('progress-text').textContent=currentQ+' / '+questions.length;
+  var sceneHtml=q.scene?'<div class="question-scene">'+q.scene+'</div>':'';
+  var optHtml='';
+  for(var i=0;i<q.options.length;i++){
+    var o=q.options[i],sel=(answers[currentQ]===i)?' selected':'';
+    optHtml+='<button class="option'+sel+'" data-idx="'+i+'"><span class="option-letter">'+o.letter+'</span><span>'+o.text+'</span></button>';
+  }
+  document.getElementById('question-container').innerHTML='<div class="question-card"><div class="question-number">问题 '+q.id+' / 15</div>'+sceneHtml+'<div class="question-text">'+q.text+'</div><div class="options">'+optHtml+'</div></div>';
+  document.querySelectorAll('.option').forEach(function(btn){
+    btn.addEventListener('click',function(){selectOption(parseInt(this.getAttribute('data-idx')));});
+  });
+  document.getElementById('btn-prev').disabled=(currentQ===0);
+  document.getElementById('btn-next').disabled=(answers[currentQ]===undefined);
+  document.getElementById('btn-next').textContent=(currentQ===questions.length-1)?'查看结果 →':'下一题 →';
+}
+
+function selectOption(idx){
+  var q=questions[currentQ];
+  if(answers[currentQ]!==undefined&&!q.isBg){var p=q.options[answers[currentQ]];score_d1-=p.d1;score_d2-=p.d2;}
+  answers[currentQ]=idx;
+  if(!q.isBg){score_d1+=q.options[idx].d1;score_d2+=q.options[idx].d2;}
+  renderQuestion();
+  if(autoTimer)clearTimeout(autoTimer);
+  autoTimer=setTimeout(function(){
+    if(currentQ<questions.length-1){currentQ++;renderQuestion();}
+    else calculateResult();
+  },300);
+}
+
+function prevQuestion(){
+  if(autoTimer)clearTimeout(autoTimer);
+  if(currentQ>0){currentQ--;renderQuestion();}
+}
+function nextQuestion(){
+  if(autoTimer)clearTimeout(autoTimer);
+  if(answers[currentQ]===undefined)return;
+  if(currentQ<questions.length-1){currentQ++;renderQuestion();}
+  else calculateResult();
+}
+
+function calculateResult(){
+  var d1p=score_d1>0,d2p=score_d2>0;
+  if(d1p&&d2p)quadrantKey="1";
+  else if(!d1p&&d2p)quadrantKey="2";
+  else if(d1p&&!d2p)quadrantKey="3";
+  else quadrantKey="4";
+  showReveal();
+}
+
+function showReveal(){
+  var qd=quadrants[quadrantKey];
+  document.getElementById('reveal-name').textContent=qd.name;
+  document.getElementById('reveal-tagline').textContent=qd.tagline;
+  document.getElementById('reveal-dims-explain').innerHTML=buildDimsHtml(qd,'block');
+  showScreen('screen-reveal');
+}
+
+function showFullResult(){
+  var qd=quadrants[quadrantKey];
+  document.getElementById('result-name').textContent=qd.name;
+  document.getElementById('result-tagline').textContent=qd.tagline;
+  document.getElementById('result-dims-explain').innerHTML=buildDimsHtml(qd,'block');
+
+  var bg9=answers[8]!==undefined?questions[8].options[answers[8]].bg:"A";
+  var bg10=answers[9]!==undefined?questions[9].options[answers[9]].bg:"A";
+  var bg11=answers[10]!==undefined?questions[10].options[answers[10]].bg:"A";
+  var fear=answers[14]!==undefined?questions[14].options[answers[14]].fear:"A";
+  var originText=bgOrigin[bg9]||"";
+  var addOn=(bg10==="C"||bg10==="D")?"<p>"+q10AddOn[bg10]+"</p>":"";
+  var needText=needDesc[bg11]||"";
+  var reflectText=reflectMap[fear]||"";
+
+  var html="";
+  html+='<div class="result-section"><div class="section-label">你是个什么样的人</div><div class="section-title">你对爱有一种非常具体的感知方式</div><div class="section-body"><p>'+qd.p1+'</p><p>'+qd.p2+'</p><p>'+qd.p3+'</p></div></div>';
+  html+='<div class="result-section"><div class="section-label">这个模式从哪里来</div><div class="section-title">它有更早的来处</div><div class="section-body"><p>这个模式不是天生的，它有更早的来处。</p><p>'+originText+'</p>'+addOn+'</div></div>';
+  html+='<div class="result-section"><div class="section-label">力量与盲点</div><div class="section-title">你在关系里的力量是真实的</div><div class="section-body"><p>'+qd.strength+'</p><p>'+qd.blind+'</p><div class="highlight-box">'+needText+'</div></div></div>';
+  html+='<div class="result-section"><div class="section-label">走向极端时</div><div class="section-title">需要警惕的地方</div><div class="section-body"><p>'+qd.extreme+'</p><div class="highlight-box">'+qd.extremeHL+'</div></div></div>';
+  html+='<div class="result-section"><div class="section-label">留给你的问题</div><div class="section-body"><p>这个测评到这里结束了，但有一个问题留给你。</p><p>不需要回答给任何人，只是带着它，往你自己的历史里走一走。</p><div class="reflect-q">'+reflectText+'</div></div></div>';
+  document.getElementById('result-content').innerHTML=html;
+
+  // Populate share cards
+  var qd=quadrants[quadrantKey];
+  document.getElementById('sc-lite-name').textContent=qd.name;
+  document.getElementById('sc-lite-tagline').textContent=qd.tagline;
+  document.getElementById('sc-lite-dims').innerHTML=buildDimsHtml(qd,'card');
+
+  document.getElementById('sc-full-name').textContent=qd.name;
+  document.getElementById('sc-full-tagline').textContent=qd.tagline;
+  document.getElementById('sc-full-dims').innerHTML=buildDimsHtml(qd,'card');
+  document.getElementById('sc-full-extra').innerHTML=
+    '<div class="sc-extra-item"><div class="sc-extra-label">力量</div><div class="sc-extra-text">'+qd.strength+'</div></div>'+
+    '<div class="sc-extra-item"><div class="sc-extra-label">盲点</div><div class="sc-extra-text">'+qd.blind+'</div></div>';
+
+  showScreen('screen-result');
+}
+
+function generateImage(cardId,filename){
+  var card=document.getElementById(cardId);
+  card.style.top='0'; card.style.left='0'; card.style.zIndex='-1';
+  html2canvas(card,{backgroundColor:'#f5f0eb',scale:2,useCORS:true,logging:false}).then(function(canvas){
+    card.style.top='-9999px'; card.style.left='0'; card.style.zIndex='auto';
+    var img=canvas.toDataURL('image/png');
+    document.getElementById('share-preview').src=img;
+    document.getElementById('share-modal').classList.add('active');
+    document.getElementById('btn-download').onclick=function(){
+      var a=document.createElement('a');
+      a.download=filename; a.href=img; a.click();
+    };
+  }).catch(function(){
+    card.style.top='-9999px';
+    alert('生成图片时遇到问题，请截图保存。');
+  });
+}
+
+// Events
+document.getElementById('btn-start').addEventListener('click',function(){showScreen('screen-quiz');renderQuestion();});
+document.getElementById('btn-prev').addEventListener('click',prevQuestion);
+document.getElementById('btn-next').addEventListener('click',nextQuestion);
+document.getElementById('btn-full-result').addEventListener('click',showFullResult);
+document.getElementById('btn-share-lite').addEventListener('click',function(){generateImage('share-card-lite','\u955c\u91cc-\u7cbe\u70bc\u7248.png');});
+document.getElementById('btn-share-full').addEventListener('click',function(){generateImage('share-card-full','\u955c\u91cc-\u5b8c\u6574\u7248.png');});
+document.getElementById('btn-close-modal').addEventListener('click',function(){document.getElementById('share-modal').classList.remove('active');});
+document.getElementById('share-modal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('active');});
+
+})();
+</script>
+</body>
+</html>
